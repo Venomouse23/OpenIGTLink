@@ -101,6 +101,11 @@ int main(int argc, char* argv[])
 
         // Receive generic header from the socket
         int r = socket->Receive(headerMsg->GetPackPointer(), headerMsg->GetPackSize());
+
+		igtl::PointMessage::Pointer pointMsg;
+		pointMsg = igtl::PointMessage::New();
+		pointMsg->SetDeviceName("PointSender");
+
         if (r == 0)
           {
           socket->CloseSocket();
@@ -170,6 +175,60 @@ int main(int argc, char* argv[])
           std::cerr << "Size : " << headerMsg->GetBodySizeToRead() << std::endl;
           socket->Skip(headerMsg->GetBodySizeToRead(), 0);
           }
+
+
+		//---------------------------
+		// Create 1st point
+		igtl::PointElement::Pointer point0;
+		point0 = igtl::PointElement::New();
+		point0->SetName("POINT_0");
+		point0->SetGroupName("GROUP_0");
+		point0->SetRGBA(0xFF, 0x00, 0x00, 0xFF);
+		point0->SetPosition(15.0, 25.0, 35.0);
+		point0->SetRadius(15.0);
+		point0->SetOwner("IMAGE_0");
+
+		pointMsg->AddPointElement(point0);
+		pointMsg->Pack();
+		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
+		pointMsg->ClearPointElement();
+		igtl::Sleep(1500);
+		//---------------------------
+		// Create 2nd point
+		igtl::PointElement::Pointer point1;
+		point1 = igtl::PointElement::New();
+		point1->SetName("POINT_1");
+		point1->SetGroupName("GROUP_0");
+		point1->SetRGBA(0x00, 0xFF, 0x00, 0xFF);
+		point1->SetPosition(45.0, 65.0, 80.0);
+		point1->SetRadius(45.0);
+		point1->SetOwner("IMAGE_0");
+
+		pointMsg->AddPointElement(point1);
+		pointMsg->Pack();
+		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
+		pointMsg->ClearPointElement();
+		igtl::Sleep(1500);
+		//---------------------------
+		// Create 3rd point
+		igtl::PointElement::Pointer point2;
+		point2 = igtl::PointElement::New();
+		point2->SetName("POINT_2");
+		point2->SetGroupName("GROUP_0");
+		point2->SetRGBA(0x00, 0x00, 0xFF, 0xFF);
+		point2->SetPosition(10.0, 100.0, 55.0);
+		point2->SetRadius(75.0);
+		point2->SetOwner("IMAGE_0");
+
+
+		pointMsg->AddPointElement(point2);
+		pointMsg->Pack();
+		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
+		
+		
+		
+
+
         }
       }
     }
