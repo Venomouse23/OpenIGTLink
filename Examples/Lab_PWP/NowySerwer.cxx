@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
     exit(0);
     }
 
-  int    port     = atoi(argv[1]);
-
+  //int    port     = atoi(argv[1]);
+  int port = atoi(argv[1]);
   igtl::ServerSocket::Pointer serverSocket;
   serverSocket = igtl::ServerSocket::New();
   int r = serverSocket->CreateServer(port);
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
           socket->Skip(headerMsg->GetBodySizeToRead(), 0);
           }
 
-
+		/*
 		//---------------------------
 		// Create 1st point
 		igtl::PointElement::Pointer point0;
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 		pointMsg->AddPointElement(point0);
 		pointMsg->Pack();
 		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
-		pointMsg->ClearPointElement();
+		//pointMsg->ClearPointElement();
 		igtl::Sleep(1500);
 		//---------------------------
 		// Create 2nd point
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
 		pointMsg->AddPointElement(point1);
 		pointMsg->Pack();
 		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
-		pointMsg->ClearPointElement();
+		
 		igtl::Sleep(1500);
 		//---------------------------
 		// Create 3rd point
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 
 		pointMsg->AddPointElement(point2);
 		pointMsg->Pack();
-		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
+		socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize()); */
 		
 		
 		
@@ -414,11 +414,21 @@ int ReceivePoint(igtl::Socket * socket, igtl::MessageHeader * header)
   // If you want to skip CRC check, call Unpack() without argument.
   int c = pointMsg->Unpack(1);
 
+  igtl::PointMessage::Pointer serverPointMsg;
+  serverPointMsg = igtl::PointMessage::New();
+  serverPointMsg->SetDeviceName("PWPlab2");
+
   if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
     {
     int nElements = pointMsg->GetNumberOfPointElement();
     for (int i = 0; i < nElements; i ++)
       {
+
+
+		igtl::PointMessage::Pointer serverPointMsg;
+		serverPointMsg = igtl::PointMessage::New();
+		serverPointMsg->SetDeviceName("PWPlab2");
+
       igtl::PointElement::Pointer pointElement;
       pointMsg->GetPointElement(i, pointElement);
 
@@ -436,10 +446,22 @@ int ReceivePoint(igtl::Socket * socket, igtl::MessageHeader * header)
       std::cerr << " Radius    : " << std::fixed << pointElement->GetRadius() << std::endl;
       std::cerr << " Owner     : " << pointElement->GetOwner() << std::endl;
       std::cerr << "================================" << std::endl;
+
+	  // ustawianie punktow z ujemnymi wartosciami
+	  pointElement->SetPosition(pos[0] * -1, pos[1] * -1, pos[2] * -1);
+	  serverPointMsg->AddPointElement(pointElement);
+	  serverPointMsg->SetDeviceType("PWPlab2");
+	  serverPointMsg->Pack();
+
+	  igtl::Sleep(1500); // uœpienie na 1.5 sekundy do oddzielenia przychodzacych po sobie wiadomosci
+	  socket->Send(serverPointMsg->GetPackPointer(), serverPointMsg->GetPackSize());
+
       }
     }
 
-  return 1;
+ // return 1;
+  socket->CloseSocket();
+  return 0;
 }
 
 int ReceiveTrajectory(igtl::Socket * socket, igtl::MessageHeader::Pointer& header)

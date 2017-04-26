@@ -44,9 +44,10 @@ int main(int argc, char* argv[])
     exit(0);
     }
 
-  char*  hostname = argv[1];
-  int    port     = atoi(argv[2]);
-
+  //char*  hostname = argv[1];
+  //int    port     = atoi(argv[2]);
+  char* hostname = "127.0.0.1";
+  int port = 1026;
   //------------------------------------------------------------
   // Establish Connection
 
@@ -236,6 +237,7 @@ int ReceivePoint(igtl::Socket * socket, igtl::MessageHeader * header)
 	// Deserialize the transform data
 	// If you want to skip CRC check, call Unpack() without argument.
 	int c = pointMsg->Unpack(1);
+	
 
 	if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
 	{
